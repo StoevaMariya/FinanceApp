@@ -1,0 +1,27 @@
+﻿@model IEnumerable<FinanceApp.Models.Transaction>
+
+<h2>Transactions</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Amount</th>
+            <th>Date</th>
+            <th>CategoryId</th>
+            <th>UserId</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var transaction in Model)
+        {
+            <tr>
+                <td>@transaction.Id</td>
+                <td>@transaction.Amount</td>
+                <td>@transaction.Date.ToShortDateString()</td>
+                <td>@transaction.CategoryId</td>
+                <td>@transaction.UserId</td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,25 @@
+﻿@model IEnumerable<FinanceApp.Models.User>
+
+<h2>Users</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Username</th>
+            <th>PasswordHash</th>
+            <th>DefaultCurrency</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.Id</td>
+                <td>@user.Username</td>
+                <td>@user.PasswordHash</td>
+                <td>@user.DefaultCurrency</td>
+            </tr>
+        }
+    </tbody>
+</table>
