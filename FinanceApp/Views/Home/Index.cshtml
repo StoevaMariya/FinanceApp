@@ -1,8 +1,40 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Login";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="row justify-content-center mt-5">
+    <div class="col-md-4">
+        <div class="card shadow-lg rounded">
+            <div class="card-body">
+                <h3 class="text-center mb-4">🔐 Вход в системата</h3>
+
+                @if (ViewBag.ErrorMessage != null)
+                {
+                    <div class="alert alert-danger text-center">
+                        @ViewBag.ErrorMessage
+                    </div>
+                }
+
+                <form asp-action="Login" method="post">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Потребителско име</label>
+                        <input type="text" name="username" id="username" class="form-control" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Парола</label>
+                        <input type="password" name="password" id="password" class="form-control" required />
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Вход</button>
+                    </div>
+                </form>
+
+                <div class="mt-3 text-center">
+                    <small>Нямаш профил? <a asp-controller="Users" asp-action="Create">Регистрирай се</a></small>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
