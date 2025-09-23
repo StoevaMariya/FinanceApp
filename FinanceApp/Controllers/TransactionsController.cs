@@ -1,43 +1,123 @@
 ﻿using FinanceApp.Data;
 using FinanceApp.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 
-namespace FinanceApp.Controllers
+public class TransactionsController : Controller
 {
-    public class TransactionsController : Controller
+    private readonly FinanceAppContext _context;
+
+    public TransactionsController(FinanceAppContext context)
     {
-        private readonly FinanceAppContext _context;
+        _context = context;
+    }
 
-        public TransactionsController(FinanceAppContext context)
+    // GET: Transactions
+    public async Task<IActionResult> Index()
+    {
+        var transactions = await _context.Transactions
+            .Include(t => t.Category)
+            .ToListAsync();
+
+        return View(transactions);
+    }
+
+    // GET: Transactions/Create
+    public async Task<IActionResult> Create(string type)
+    {
+        ViewBag.Categories = new SelectList(await _context.Categories.ToListAsync(), "Id", "Name");
+
+        // ако е подаден тип (Income/Expense), го подаваме към View-то
+        ViewBag.Type = type;
+
+        return View();
+    }
+
+    // POST: Transactions/Create
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(Transaction transaction)
+    {
+        if (ModelState.IsValid)
         {
-            _context = context;
+            // Ако потребителят не е задал дата, слагаме текущата
+            transaction.Date = transaction.Date == default ? DateTime.Now : transaction.Date;
+
+            _context.Add(transaction);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
-        // GET: Transactions
-        public IActionResult Index()
-        {
-            var transactions = _context.Transactions.ToList();
-            return View(transactions);
-        }
+        ViewBag.Categories = new SelectList(await _context.Categories.ToListAsync(), "Id", "Name", transaction.CategoryId);
+        return View(transaction);
+    }
 
-        // GET: Transactions/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
+    // GET: Transactions/Edit/5
+    public async Task<IActionResult> Edit(int? id)
+    {
+        if (id == null) return NotFound();
 
-        // POST: Transactions/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Create(Transaction transaction)
+        var transaction = await _context.Transactions.FindAsync(id);
+        if (transaction == null) return NotFound();
+
+        ViewBag.Categories = new SelectList(_context.Categories, "Id", "Name", transaction.CategoryId);
+        return View(transaction);
+    }
+
+    // POST: Transactions/Edit/5
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(int id, Transaction transaction)
+    {
+        if (id != transaction.Id) return NotFound();
+
+        if (ModelState.IsValid)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Transactions.Add(transaction);   // добавя в контекста
-                _context.SaveChanges();                  // записва в базата
-                return RedirectToAction(nameof(Index));  // връща към списъка
+                _context.Update(transaction);
+                await _context.SaveChangesAsync();
             }
-            return View(transaction);
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_context.Transactions.Any(e => e.Id == transaction.Id))
+                    return NotFound();
+                else
+                    throw;
+            }
+            return RedirectToAction(nameof(Index));
         }
+
+        ViewBag.Categories = new SelectList(_context.Categories, "Id", "Name", transaction.CategoryId);
+        return View(transaction);
+    }
+
+    // GET: Transactions/Delete/5
+    public async Task<IActionResult> Delete(int? id)
+    {
+        if (id == null) return NotFound();
+
+        var transaction = await _context.Transactions
+            .Include(t => t.Category)
+            .FirstOrDefaultAsync(m => m.Id == id);
+
+        if (transaction == null) return NotFound();
+
+        return View(transaction);
+    }
+
+    // POST: Transactions/Delete/5
+    [HttpPost, ActionName("Delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteConfirmed(int id)
+    {
+        var transaction = await _context.Transactions.FindAsync(id);
+        if (transaction != null)
+        {
+            _context.Transactions.Remove(transaction);
+            await _context.SaveChangesAsync();
+        }
+        return RedirectToAction(nameof(Index));
     }
 }

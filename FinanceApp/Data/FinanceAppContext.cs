@@ -17,12 +17,13 @@ namespace FinanceApp.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Transaction>()
-                .HasOne(t => t.User)
-                .WithMany(u => u.Transactions)
-                .HasForeignKey(t => t.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Category>().HasData(
+                new Category { Id = 1, Name = "Заплата" },
+                new Category { Id = 2, Name = "Храна" },
+                new Category { Id = 3, Name = "Транспорт" }
+            );
         }
+
 
     }
 }

@@ -1,16 +1,17 @@
-﻿namespace FinanceApp.Models;
-
-public class Transaction
+﻿namespace FinanceApp.Models
 {
-    public int Id { get; set; }
-    public TransactionType Type { get; set; }
-    public decimal Amount { get; set; }
-    public DateTime Date { get; set; }
-    public string? Description { get; set; }
+    public class Transaction
+    {
+        public int Id { get; set; }
+        public TransactionType Type { get; set; }
+        public DateTime Date { get; set; }
 
-    public int CategoryId { get; set; }
-    public Category Category { get; set; } = null!;
+        // Връзка с категория
+        public int CategoryId { get; set; }
+        public Category? Category { get; set; }
 
-    public int UserId { get; set; }
-    public User User { get; set; } = null!;
+        public string Currency { get; set; } = "BGN";
+        public decimal Amount { get; set; }
+        public string? Description { get; set; }
+    }
 }

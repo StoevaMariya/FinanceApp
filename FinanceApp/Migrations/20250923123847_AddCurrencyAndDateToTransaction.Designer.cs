@@ -4,6 +4,7 @@ using FinanceApp.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FinanceApp.Migrations
 {
     [DbContext(typeof(FinanceAppContext))]
-    partial class FinanceAppContextModelSnapshot : ModelSnapshot
+    [Migration("20250923123847_AddCurrencyAndDateToTransaction")]
+    partial class AddCurrencyAndDateToTransaction
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -34,7 +37,7 @@ namespace FinanceApp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("UserId")
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -42,23 +45,6 @@ namespace FinanceApp.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Categories");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "Заплата"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "Храна"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "Транспорт"
-                        });
                 });
 
             modelBuilder.Entity("FinanceApp.Models.Transaction", b =>
@@ -88,7 +74,7 @@ namespace FinanceApp.Migrations
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
-                    b.Property<int?>("UserId")
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -127,29 +113,32 @@ namespace FinanceApp.Migrations
 
             modelBuilder.Entity("FinanceApp.Models.Category", b =>
                 {
-                    b.HasOne("FinanceApp.Models.User", null)
+                    b.HasOne("FinanceApp.Models.User", "User")
                         .WithMany("Categories")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("FinanceApp.Models.Transaction", b =>
                 {
                     b.HasOne("FinanceApp.Models.Category", "Category")
-                        .WithMany("Transactions")
+                        .WithMany()
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("FinanceApp.Models.User", null)
+                    b.HasOne("FinanceApp.Models.User", "User")
                         .WithMany("Transactions")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Category");
-                });
 
-            modelBuilder.Entity("FinanceApp.Models.Category", b =>
-                {
-                    b.Navigation("Transactions");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("FinanceApp.Models.User", b =>
