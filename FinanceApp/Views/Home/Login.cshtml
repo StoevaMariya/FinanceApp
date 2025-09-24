@@ -15,7 +15,7 @@
                     </div>
                 }
 
-                <form asp-action="Login" method="post">
+                <form asp-controller="Home" asp-action="Login" method="post">
                     <div class="mb-3">
                         <label for="username" class="form-label">Потребителско име</label>
                         <input type="text" name="username" id="username" class="form-control" required />
@@ -31,8 +31,9 @@
                     </div>
                 </form>
 
+
                 <div class="mt-3 text-center">
-                    <small>Нямаш профил? <a asp-controller="Users" asp-action="Create">Регистрирай се</a></small>
+                    <small>Нямаш профил? <a asp-controller="Registraion" asp-action="Create">Регистрирай се</a></small>
                 </div>
             </div>
         </div>

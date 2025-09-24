@@ -32,7 +32,7 @@ namespace FinanceApp.Controllers
                 HttpContext.Session.SetString("Username", user.Username);
                 HttpContext.Session.SetInt32("UserId", user.Id);
 
-                return RedirectToAction("Index", "Transactions"); // след успешен вход
+                return RedirectToAction("Index", "Dashboard"); // след успешен вход
             }
 
             ViewBag.ErrorMessage = "Невалидно потребителско име или парола.";
@@ -43,7 +43,8 @@ namespace FinanceApp.Controllers
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
-            return RedirectToAction("Login");
+            return RedirectToAction("Login", "Users");
+
         }
     }
 }

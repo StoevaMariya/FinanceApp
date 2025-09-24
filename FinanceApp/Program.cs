@@ -42,6 +42,15 @@ using (var scope = app.Services.CreateScope())
 
         db.SaveChanges();
     }
+    var orphaned = db.Transactions.Where(t => t.UserId == null).ToList();
+    if (orphaned.Any())
+    {
+        foreach (var t in orphaned)
+        {
+            t.UserId = 1; // Assuming testuser has ID = 1
+        }
+        db.SaveChanges();
+    }
 }
 
 // Configure the HTTP request pipeline.
@@ -56,6 +65,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+app.UseSession();
 
 app.UseAuthorization();
 

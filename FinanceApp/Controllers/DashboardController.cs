@@ -4,56 +4,74 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
-public class TransactionsController : Controller
+public class DashboardController : Controller
 {
     private readonly FinanceAppContext _context;
 
-    public TransactionsController(FinanceAppContext context)
+    public DashboardController(FinanceAppContext context)
     {
         _context = context;
     }
 
-    // GET: Transactions
+    // GET: Dashboard/Index
     public async Task<IActionResult> Index()
     {
+        var userId = HttpContext.Session.GetInt32("UserId");
+
+        if (userId == null)
+        {
+            return RedirectToAction("Login", "Users");
+        }
+
         var transactions = await _context.Transactions
+            .Where(t => t.UserId == userId.Value)
             .Include(t => t.Category)
+            .OrderByDescending(t => t.Date)
             .ToListAsync();
 
         return View(transactions);
     }
 
-    // GET: Transactions/Create
+    // GET: Dashboard/Create
     public async Task<IActionResult> Create(string type)
     {
         ViewBag.Categories = new SelectList(await _context.Categories.ToListAsync(), "Id", "Name");
-
-        // ако е подаден тип (Income/Expense), го подаваме към View-то
-        ViewBag.Type = type;
+        ViewBag.Type = type; // Pass Income/Expense type to the view
 
         return View();
     }
 
-    // POST: Transactions/Create
+    // POST: Dashboard/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
+
     public async Task<IActionResult> Create(Transaction transaction)
     {
+        var userId = HttpContext.Session.GetInt32("UserId");
+
+        if (userId == null)
+        {
+            return RedirectToAction("Login", "Users");
+        }
+
         if (ModelState.IsValid)
         {
-            // Ако потребителят не е задал дата, слагаме текущата
+            transaction.UserId = userId.Value; // 🔥 Assign the logged-in user ID
+
             transaction.Date = transaction.Date == default ? DateTime.Now : transaction.Date;
 
             _context.Add(transaction);
             await _context.SaveChangesAsync();
-            return RedirectToAction("Index","Dashboard");
+            return RedirectToAction(nameof(Index));
         }
 
         ViewBag.Categories = new SelectList(await _context.Categories.ToListAsync(), "Id", "Name", transaction.CategoryId);
         return View(transaction);
     }
 
-    // GET: Transactions/Edit/5
+
+
+    // GET: Dashboard/Edit/5
     public async Task<IActionResult> Edit(int? id)
     {
         if (id == null) return NotFound();
@@ -65,7 +83,7 @@ public class TransactionsController : Controller
         return View(transaction);
     }
 
-    // POST: Transactions/Edit/5
+    // POST: Dashboard/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, Transaction transaction)
@@ -93,7 +111,7 @@ public class TransactionsController : Controller
         return View(transaction);
     }
 
-    // GET: Transactions/Delete/5
+    // GET: Dashboard/Delete/5
     public async Task<IActionResult> Delete(int? id)
     {
         if (id == null) return NotFound();
@@ -107,7 +125,7 @@ public class TransactionsController : Controller
         return View(transaction);
     }
 
-    // POST: Transactions/Delete/5
+    // POST: Dashboard/Delete/5
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
