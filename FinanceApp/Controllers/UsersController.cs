@@ -46,5 +46,15 @@ namespace FinanceApp.Controllers
             return RedirectToAction("Login", "Users");
 
         }
+        public IActionResult Create(User user)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Users.Add(user);
+                _context.SaveChanges();
+                return RedirectToAction("Index", "Home");
+            }
+            return View(user);
+        }
     }
 }

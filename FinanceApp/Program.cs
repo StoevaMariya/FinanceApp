@@ -13,20 +13,19 @@ builder.Services.AddDbContext<FinanceAppContext>(options =>
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30); // колко време пазим сесията
+    options.IdleTimeout = TimeSpan.FromMinutes(30); 
     options.Cookie.HttpOnly = true;                 // cookie достъпно само от сървъра
     options.Cookie.IsEssential = true;              // винаги да се съхранява
 });
 
-// Добавяме HttpContextAccessor за достъп до Session от _Layout.cshtml
+
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
-// ВАЖНО: включваме Session преди маршрутизацията
 app.UseSession();
 
-// Тестово добавяне на User в базата
+
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<FinanceAppContext>();

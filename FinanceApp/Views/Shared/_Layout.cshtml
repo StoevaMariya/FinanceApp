@@ -12,41 +12,17 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
 
-    <!-- Bootstrap Icons -->
+ 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container">
-                <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
-                    <ul class="navbar-nav flex-grow-1">
+       
 
+
+                  
+                      
                         
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-dark" href="#" id="transactionsDropdown"
-                               role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                               
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="transactionsDropdown">
-                                <li><a class="dropdown-item" asp-controller="Transactions" asp-action="Create" asp-route-type="Income">Income</a></li>
-                                <li><a class="dropdown-item" asp-controller="Transactions" asp-action="Create" asp-route-type="Expense">Expense</a></li>
-                                <a class="nav-link text-dark" asp-controller="Categories" asp-action="Index">Categories</a>
-                                <li><a class="dropdown-item" asp-controller="Transactions" asp-action="Index">All Transactions</a></li>
-
-
-                            </ul>
-                        </li>
-
-
-
-                        <!-- Login / Registration -->
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Login">Login</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Registration" asp-action="Create">Registration</a>
-                        </li>
                     </ul>
                 </div>
             </div>
@@ -59,11 +35,7 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - FinanceApp - <a asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
+   
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

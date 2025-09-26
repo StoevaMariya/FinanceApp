@@ -49,10 +49,11 @@
             </div>
 
             <div class="d-flex justify-content-end gap-2">
-                <button type="submit" class="btn btn-success btn-sm">
-                    <i class="bi bi-check-circle"></i> Save
-                </button>
-                <a asp-action="Index" class="btn btn-secondary btn-sm">
+                
+                <a asp-action="Index" asp-controller="Dashboard" class="btn btn-secondary btn-sm">
+					<i class ="bi bi-check-circle"></i> Save
+				</a>	
+                <a asp-action="Index" asp-controller="Dashboard" class="btn btn-secondary btn-sm">
                     <i class="bi bi-x-circle"></i> Cancel
                 </a>
             </div>

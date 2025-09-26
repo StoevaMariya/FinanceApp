@@ -56,13 +56,13 @@ public class DashboardController : Controller
 
         if (ModelState.IsValid)
         {
-            transaction.UserId = userId.Value; // 🔥 Assign the logged-in user ID
+            transaction.UserId = userId.Value; 
 
             transaction.Date = transaction.Date == default ? DateTime.Now : transaction.Date;
 
             _context.Add(transaction);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index","Dashboard");
         }
 
         ViewBag.Categories = new SelectList(await _context.Categories.ToListAsync(), "Id", "Name", transaction.CategoryId);

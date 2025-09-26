@@ -1,0 +1,47 @@
+﻿@model FinanceApp.Models.User
+
+@{
+    ViewData["Title"] = "Регистрация";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-5">
+        <div class="card shadow-lg rounded">
+            <div class="card-body">
+                <h3 class="text-center mb-4">📝 Регистрация</h3>
+
+                <form asp-action="Create" method="post">
+                    <div class="mb-3">
+                        <label asp-for="Username" class="form-label">Потребителско име</label>
+                        <input asp-for="Username" class="form-control" placeholder="Въведи потребителско име" />
+                        <span asp-validation-for="Username" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="PasswordHash" class="form-label">Парола</label>
+                        <input asp-for="PasswordHash" type="password" class="form-control" placeholder="Въведи парола" />
+                        <span asp-validation-for="PasswordHash" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="DefaultCurrency" class="form-label">Валута по подразбиране</label>
+                        <select asp-for="DefaultCurrency" class="form-select">
+                            <option value="BGN">Лева (BGN)</option>
+                            <option value="EUR">Евро (EUR)</option>
+                            <option value="USD">Щатски долар (USD)</option>
+                        </select>
+                        <span asp-validation-for="DefaultCurrency" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success">Регистрация</button>
+                    </div>
+                </form>
+
+                <div class="mt-3 text-center">
+                    <small>Вече имаш профил? <a asp-controller="Users" asp-action="Login">Вход</a></small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
