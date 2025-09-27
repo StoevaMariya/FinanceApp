@@ -1,0 +1,71 @@
+﻿@{
+    ViewData["Title"] = "Balance";
+    var currentYear = DateTime.Now.Year;
+}
+
+<div class="card shadow-sm mt-4">
+    <div class="card-header bg-primary text-white fw-bold text-center">
+        💰 Balance Overview
+    </div>
+    <div class="card-body">
+
+        <!-- Форма за избор на период -->
+        <form method="get" asp-controller="Dashboard" asp-action="Balance" class="row g-3 mb-4">
+            <div class="col-md-4">
+                <select name="month" class="form-select">
+                    <option value="">-- Select Month --</option>
+                    @for (int m = 1; m <= 12; m++)
+                    {
+                        if (ViewBag.SelectedMonth == m)
+                        {
+                            <option value="@m" selected>
+                                @System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(m)
+                            </option>
+                        }
+                        else
+                        {
+                            <option value="@m">
+                                @System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(m)
+                            </option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <select name="year" class="form-select">
+                    <option value="">-- Select Year --</option>
+                    @for (int y = currentYear - 5; y <= currentYear; y++)
+                    {
+                        if (ViewBag.SelectedYear == y)
+                        {
+                            <option value="@y" selected>@y</option>
+                        }
+                        else
+                        {
+                            <option value="@y">@y</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
+            </div>
+        </form>
+
+        <!-- Обобщение -->
+        <div class="text-center">
+            <p class="fs-4 text-success">
+                ✅ Total Income: @ViewBag.Incomes.ToString("0.00") BGN
+            </p>
+            <p class="fs-4 text-danger">
+                ❌ Total Expense: @ViewBag.Expenses.ToString("0.00") BGN
+            </p>
+            <hr />
+            <p class="fs-3 fw-bold @(ViewBag.Balance >= 0 ? "text-success" : "text-danger")">
+                📊 Current Balance: @ViewBag.Balance.ToString("0.00") BGN
+            </p>
+        </div>
+    </div>
+</div>

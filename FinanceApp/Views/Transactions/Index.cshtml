@@ -3,8 +3,59 @@
 
 @{
     ViewData["Title"] = "Transactions History";
+    var username = Context.Session.GetString("Username");
 }
 
+<!-- Горна навигация -->
+<div class="d-flex justify-content-between align-items-center mt-3 px-3">
+    <!-- Лява част: бутон Manage + Transactions History -->
+    <div class="d-flex gap-2">
+        <div class="dropdown">
+            <button class="btn btn-outline-secondary dropdown-toggle"
+                    type="button" id="manageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                ⚙ Manage
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="manageDropdown">
+                <li>
+                    <a class="dropdown-item" asp-controller="Categories" asp-action="Index">
+                        📂 Categories
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" asp-controller="Dashboard" asp-action="Balance">
+                        💰 Balance
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-primary">
+            📊 Transactions History
+        </a>
+    </div>
+
+    <!-- Дясна част: Hello + Logout -->
+    <div class="d-flex align-items-center gap-3">
+        @if (!string.IsNullOrEmpty(username))
+        {
+            <div class="fw-bold fs-5 text-primary">
+                Hello, @username!
+            </div>
+        }
+
+        <form asp-controller="Home" asp-action="Logout" method="post" class="d-inline">
+            @Html.AntiForgeryToken()
+            <button type="submit"
+                    style="background-color:#007bff; color:white; border:none;
+                           border-radius:50px; padding:10px 25px;
+                           font-weight:bold; cursor:pointer;">
+                Logout
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Transactions History -->
 <div class="card shadow-sm mt-4">
     <div class="card-header bg-primary text-white fw-bold text-center">
         <i class="bi bi-list-ul"></i> Transactions History
@@ -23,32 +74,61 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var item in Model)
+                @if (Model != null && Model.Any())
                 {
-                    @* подсигури се, че сравняваш enum към enum *@
-                    var isIncome = item.Type == TransactionType.Income;
-                    var iconHtml = isIncome
-                    ? "<i class=\"bi bi-arrow-up-circle text-success\"></i>"
-                    : "<i class=\"bi bi-arrow-down-circle text-danger\"></i>";
+                    foreach (var item in Model)
+                    {
+                        var isIncome = item.Type == TransactionType.Income;
+                        var iconHtml = isIncome
+                        ? "<i class=\"bi bi-arrow-up-circle text-success\"></i>"
+                        : "<i class=\"bi bi-arrow-down-circle text-danger\"></i>";
 
+                        var cssClass = isIncome ? "text-success fw-bold" : "text-danger fw-bold";
+
+                        <tr>
+                            <td>@item.Date.ToString("dd/MM/yyyy")</td>
+                            <td class="@cssClass">
+                                @Html.Raw(iconHtml) @item.Type
+                            </td>
+                            <td>@item.Category?.Name</td>
+                            <td>@item.Currency</td>
+                            <td class="@cssClass">@item.Amount.ToString("0.00")</td>
+                            <td>@item.Description</td>
+                            <td class="text-center">
+                                <a asp-controller="Transactions"
+                                   asp-action="Edit"
+                                   asp-route-id="@item.Id"
+                                   class="btn btn-sm btn-warning me-2">
+                                    <i class="bi bi-pencil-square"></i> Edit
+                                </a>
+                                <form asp-controller="Transactions"
+                                      asp-action="Delete"
+                                      asp-route-id="@item.Id"
+                                      method="post"
+                                      style="display:inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-danger">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
                     <tr>
-                        <td>@item.Date.ToString("dd/MM/yyyy")</td>
-                        <td>@Html.Raw(iconHtml) @item.Type</td>
-                        <td>@item.Category?.Name</td>
-                        <td>@item.Currency</td>
-                        <td>@item.Amount.ToString("0.00")</td>
-                        <td>@item.Description</td>
-                        <td class="text-center">
-                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning me-2">
-                                <i class="bi bi-pencil-square"></i> Edit
-                            </a>
-                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">
-                                <i class="bi bi-trash"></i> Delete
-                            </a>
+                        <td colspan="7" class="text-center text-muted">
+                            No transactions available.
                         </td>
                     </tr>
                 }
             </tbody>
         </table>
     </div>
+</div>
+
+<div class="d-flex gap-3">
+    <a asp-controller="Transactions" asp-action="Create" class="btn btn-outline-primary" asp-route-type="Income"> 💰 Add Income</a>
+    <a asp-controller="Transactions" asp-action="Create" class="btn btn-outline-success" asp-route-type="Expense"> 💰 Add Expense</a>
 </div>

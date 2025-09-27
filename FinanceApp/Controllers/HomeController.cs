@@ -15,7 +15,6 @@ namespace FinanceApp.Controllers
             _context = context;
             _logger = logger;
         }
-       
 
         public IActionResult Index()
         {
@@ -26,8 +25,17 @@ namespace FinanceApp.Controllers
         {
             return View();
         }
+
+        // GET: Login page
         [HttpGet]
+        public IActionResult Login()
+        {
+            return View();
+        }
+
+        // POST: Process login form
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Login(string username, string password)
         {
             var user = _context.Users
@@ -35,8 +43,10 @@ namespace FinanceApp.Controllers
 
             if (user != null)
             {
+                // записваме в сесията
                 HttpContext.Session.SetString("Username", user.Username);
                 HttpContext.Session.SetInt32("UserId", user.Id);
+
                 return RedirectToAction("Index", "Dashboard");
             }
 
@@ -44,6 +54,11 @@ namespace FinanceApp.Controllers
             return View();
         }
 
+        public IActionResult Logout()
+        {
+            HttpContext.Session.Clear();
+            return RedirectToAction("Login");
+        }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

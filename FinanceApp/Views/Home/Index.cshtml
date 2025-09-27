@@ -13,7 +13,19 @@
                     <div class="alert alert-danger text-center">
                         @ViewBag.ErrorMessage
                     </div>
+
                 }
+                @{
+                    var username = Context.Session.GetString("Username");
+                }
+
+                @if (!string.IsNullOrEmpty(username))
+                {
+                    <div class="alert alert-success text-center">
+                        Hello, @username!
+                    </div>
+                }
+
 
                 <form asp-action="Login" method="post">
                     <div class="mb-3">

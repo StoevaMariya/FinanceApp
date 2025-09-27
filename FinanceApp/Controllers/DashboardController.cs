@@ -1,141 +1,79 @@
 ﻿using FinanceApp.Data;
-using FinanceApp.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
-public class DashboardController : Controller
+namespace FinanceApp.Controllers
 {
-    private readonly FinanceAppContext _context;
-
-    public DashboardController(FinanceAppContext context)
+    public class DashboardController : Controller
     {
-        _context = context;
-    }
+        private readonly FinanceAppContext _context;
 
-    // GET: Dashboard/Index
-    public async Task<IActionResult> Index()
-    {
-        var userId = HttpContext.Session.GetInt32("UserId");
-
-        if (userId == null)
+        public DashboardController(FinanceAppContext context)
         {
-            return RedirectToAction("Login", "Users");
+            _context = context;
         }
 
-        var transactions = await _context.Transactions
-            .Where(t => t.UserId == userId.Value)
-            .Include(t => t.Category)
-            .OrderByDescending(t => t.Date)
-            .ToListAsync();
-
-        return View(transactions);
-    }
-
-    // GET: Dashboard/Create
-    public async Task<IActionResult> Create(string type)
-    {
-        ViewBag.Categories = new SelectList(await _context.Categories.ToListAsync(), "Id", "Name");
-        ViewBag.Type = type; // Pass Income/Expense type to the view
-
-        return View();
-    }
-
-    // POST: Dashboard/Create
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-
-    public async Task<IActionResult> Create(Transaction transaction)
-    {
-        var userId = HttpContext.Session.GetInt32("UserId");
-
-        if (userId == null)
+        // История на транзакциите
+        public IActionResult Index()
         {
-            return RedirectToAction("Login", "Users");
-        }
+            int? userId = HttpContext.Session.GetInt32("UserId");
 
-        if (ModelState.IsValid)
-        {
-            transaction.UserId = userId.Value; 
-
-            transaction.Date = transaction.Date == default ? DateTime.Now : transaction.Date;
-
-            _context.Add(transaction);
-            await _context.SaveChangesAsync();
-            return RedirectToAction("Index","Dashboard");
-        }
-
-        ViewBag.Categories = new SelectList(await _context.Categories.ToListAsync(), "Id", "Name", transaction.CategoryId);
-        return View(transaction);
-    }
-
-
-
-    // GET: Dashboard/Edit/5
-    public async Task<IActionResult> Edit(int? id)
-    {
-        if (id == null) return NotFound();
-
-        var transaction = await _context.Transactions.FindAsync(id);
-        if (transaction == null) return NotFound();
-
-        ViewBag.Categories = new SelectList(_context.Categories, "Id", "Name", transaction.CategoryId);
-        return View(transaction);
-    }
-
-    // POST: Dashboard/Edit/5
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, Transaction transaction)
-    {
-        if (id != transaction.Id) return NotFound();
-
-        if (ModelState.IsValid)
-        {
-            try
+            if (userId == null)
             {
-                _context.Update(transaction);
-                await _context.SaveChangesAsync();
+                return RedirectToAction("Login", "Home");
             }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!_context.Transactions.Any(e => e.Id == transaction.Id))
-                    return NotFound();
-                else
-                    throw;
-            }
-            return RedirectToAction(nameof(Index));
+
+            var transactions = _context.Transactions
+                .Include(t => t.Category)
+                .Where(t => t.UserId == userId)
+                .OrderByDescending(t => t.Date)
+                .ToList();
+
+            return View(transactions);
         }
 
-        ViewBag.Categories = new SelectList(_context.Categories, "Id", "Name", transaction.CategoryId);
-        return View(transaction);
-    }
-
-    // GET: Dashboard/Delete/5
-    public async Task<IActionResult> Delete(int? id)
-    {
-        if (id == null) return NotFound();
-
-        var transaction = await _context.Transactions
-            .Include(t => t.Category)
-            .FirstOrDefaultAsync(m => m.Id == id);
-
-        if (transaction == null) return NotFound();
-
-        return View(transaction);
-    }
-
-    // POST: Dashboard/Delete/5
-    [HttpPost, ActionName("Delete")]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteConfirmed(int id)
-    {
-        var transaction = await _context.Transactions.FindAsync(id);
-        if (transaction != null)
+        // Баланс (общо + филтри по месец/година)
+        public IActionResult Balance(int? month, int? year)
         {
-            _context.Transactions.Remove(transaction);
-            await _context.SaveChangesAsync();
+            int? userId = HttpContext.Session.GetInt32("UserId");
+
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Home");
+            }
+
+            var transactions = _context.Transactions
+                .Where(t => t.UserId == userId);
+
+            // Ако е избран месец и година
+            if (month.HasValue && year.HasValue)
+            {
+                transactions = transactions.Where(t => t.Date.Month == month.Value && t.Date.Year == year.Value);
+            }
+            // Ако е избрана само година
+            else if (year.HasValue)
+            {
+                transactions = transactions.Where(t => t.Date.Year == year.Value);
+            }
+
+            var incomes = transactions
+                .Where(t => t.Type == Models.TransactionType.Income)
+                .Sum(t => (decimal?)t.Amount) ?? 0;
+
+            var expenses = transactions
+                .Where(t => t.Type == Models.TransactionType.Expense)
+                .Sum(t => (decimal?)t.Amount) ?? 0;
+
+            var balance = incomes - expenses;
+
+            ViewBag.Incomes = incomes;
+            ViewBag.Expenses = expenses;
+            ViewBag.Balance = balance;
+
+            ViewBag.SelectedMonth = month;
+            ViewBag.SelectedYear = year;
+
+            return View();
         }
-        return RedirectToAction(nameof(Index));
     }
 }

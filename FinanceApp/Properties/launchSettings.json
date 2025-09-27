@@ -32,6 +32,29 @@
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
+          .transaction-income {
+    color: green !important;
+    font-weight: bold;
+}
+
+        .transaction-expense {
+          "color": "red",
+          "!important;": null,
+          "font-weight": "bold;",
+          ".transaction-income" {
+            "color": "green",
+            "!important;": null,
+            "font-weight": "bold;"
+          },
+
+          ".transaction-expense" {
+            "color": "red",
+            "!important;": null,
+            "font-weight": "bold;"
+          }
+
+        }
+
       }
     }
   }

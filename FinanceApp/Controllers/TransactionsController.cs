@@ -13,24 +13,17 @@ public class TransactionsController : Controller
         _context = context;
     }
 
-    // GET: Transactions
-    public async Task<IActionResult> Index()
-    {
-        var transactions = await _context.Transactions
-            .Include(t => t.Category)
-            .ToListAsync();
-
-        return View(transactions);
-    }
-
     // GET: Transactions/Create
     public async Task<IActionResult> Create(string type)
     {
+        var userId = HttpContext.Session.GetInt32("UserId");
+        if (userId == null)
+        {
+            return RedirectToAction("Login", "Home");
+        }
+
         ViewBag.Categories = new SelectList(await _context.Categories.ToListAsync(), "Id", "Name");
-
-        // ако е подаден тип (Income/Expense), го подаваме към View-то
-        ViewBag.Type = type;
-
+        ViewBag.Type = type; // Income или Expense
         return View();
     }
 
@@ -41,12 +34,19 @@ public class TransactionsController : Controller
     {
         if (ModelState.IsValid)
         {
-            // Ако потребителят не е задал дата, слагаме текущата
             transaction.Date = transaction.Date == default ? DateTime.Now : transaction.Date;
+
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Home");
+            }
+
+            transaction.UserId = userId.Value;
 
             _context.Add(transaction);
             await _context.SaveChangesAsync();
-            return RedirectToAction("Index","Dashboard");
+            return RedirectToAction("Index", "Dashboard");
         }
 
         ViewBag.Categories = new SelectList(await _context.Categories.ToListAsync(), "Id", "Name", transaction.CategoryId);
@@ -58,7 +58,15 @@ public class TransactionsController : Controller
     {
         if (id == null) return NotFound();
 
-        var transaction = await _context.Transactions.FindAsync(id);
+        var userId = HttpContext.Session.GetInt32("UserId");
+        if (userId == null)
+        {
+            return RedirectToAction("Login", "Home");
+        }
+
+        var transaction = await _context.Transactions
+            .FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
+
         if (transaction == null) return NotFound();
 
         ViewBag.Categories = new SelectList(_context.Categories, "Id", "Name", transaction.CategoryId);
@@ -72,6 +80,14 @@ public class TransactionsController : Controller
     {
         if (id != transaction.Id) return NotFound();
 
+        var userId = HttpContext.Session.GetInt32("UserId");
+        if (userId == null)
+        {
+            return RedirectToAction("Login", "Home");
+        }
+
+        transaction.UserId = userId.Value;
+
         if (ModelState.IsValid)
         {
             try
@@ -81,29 +97,15 @@ public class TransactionsController : Controller
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!_context.Transactions.Any(e => e.Id == transaction.Id))
+                if (!_context.Transactions.Any(e => e.Id == transaction.Id && e.UserId == userId))
                     return NotFound();
                 else
                     throw;
             }
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index", "Dashboard");
         }
 
         ViewBag.Categories = new SelectList(_context.Categories, "Id", "Name", transaction.CategoryId);
-        return View(transaction);
-    }
-
-    // GET: Transactions/Delete/5
-    public async Task<IActionResult> Delete(int? id)
-    {
-        if (id == null) return NotFound();
-
-        var transaction = await _context.Transactions
-            .Include(t => t.Category)
-            .FirstOrDefaultAsync(m => m.Id == id);
-
-        if (transaction == null) return NotFound();
-
         return View(transaction);
     }
 
@@ -112,12 +114,21 @@ public class TransactionsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        var transaction = await _context.Transactions.FindAsync(id);
+        var userId = HttpContext.Session.GetInt32("UserId");
+        if (userId == null)
+        {
+            return RedirectToAction("Login", "Home");
+        }
+
+        var transaction = await _context.Transactions
+            .FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
+
         if (transaction != null)
         {
             _context.Transactions.Remove(transaction);
             await _context.SaveChangesAsync();
         }
-        return RedirectToAction(nameof(Index));
+
+        return RedirectToAction("Index", "Dashboard");
     }
 }

@@ -4,14 +4,7 @@
 @{
     ViewData["Title"] = "Transactions History";
 }
-<form asp-controller="Home" asp-action="Login" method="post" class="d-inline">
-    <button type="submit"
-            style="background-color:#007bff;margin-top:20px; color:white; border:none;
-                   border-radius:50px; padding:10px 25px;
-                   font-weight:bold; cursor:pointer;">
-        Logout
-    </button>
-</form>
+
 <div class="card shadow-sm mt-4">
     <div class="card-header bg-primary text-white fw-bold text-center">
         <i class="bi bi-list-ul"></i> Transactions History
@@ -32,26 +25,43 @@
             <tbody>
                 @foreach (var item in Model)
                 {
-                    @* подсигури се, че сравняваш enum към enum *@
-                    var isIncome = item.Type == TransactionType.Income;
-                    var iconHtml = isIncome
-                    ? "<i class=\"bi bi-arrow-up-circle text-success\"></i>"
-                    : "<i class=\"bi bi-arrow-down-circle text-danger\"></i>";
-
                     <tr>
                         <td>@item.Date.ToString("dd/MM/yyyy")</td>
-                        <td>@Html.Raw(iconHtml) @item.Type</td>
+                        <td>
+                            @if (item.Type == TransactionType.Income)
+                            {
+                                <span class="text-success fw-bold">
+                                    <i class="bi bi-arrow-up-circle"></i> Income
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="text-danger fw-bold">
+                                    <i class="bi bi-arrow-down-circle"></i> Expense
+                                </span>
+                            }
+                        </td>
                         <td>@item.Category?.Name</td>
                         <td>@item.Currency</td>
                         <td>@item.Amount.ToString("0.00")</td>
                         <td>@item.Description</td>
                         <td class="text-center">
-                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning me-2">
+                            <a asp-controller="Transactions"
+                               asp-action="Edit"
+                               asp-route-id="@item.Id"
+                               class="btn btn-sm btn-warning me-2">
                                 <i class="bi bi-pencil-square"></i> Edit
                             </a>
-                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">
-                                <i class="bi bi-trash"></i> Delete
-                            </a>
+                            <form asp-controller="Transactions"
+                                  asp-action="Delete"
+                                  asp-route-id="@item.Id"
+                                  method="post"
+                                  style="display:inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-danger">
+                                    <i class="bi bi-trash"></i> Delete
+                                </button>
+                            </form>
                         </td>
                     </tr>
                 }
@@ -59,7 +69,11 @@
         </table>
     </div>
 </div>
+
 <div class="d-flex gap-3">
-    <a asp-controller="Transactions" asp-action="Create" class="btn btn-outline-primary" asp-route-type="Income"> 💰Add Income</a>
-    <a asp-controller="Transactions" asp-action="Create" class="btn btn-outline-success" asp-route-type="Expense">💰 Add expense</a>
+    <a asp-controller="Transactions" asp-action="Create" asp-route-type="Income"
+       class="btn btn-outline-primary">💰 Add Income</a>
+
+    <a asp-controller="Transactions" asp-action="Create" asp-route-type="Expense"
+       class="btn btn-outline-success">💰 Add Expense</a>
 </div>
